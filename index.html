@@ -3,11 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-    <title>PetHealth Pro v5</title>
+    <title>PetHealth Pro v6.2</title>
     
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="apple-mobile-web-app-title" content="PetHealth">
     <link rel="apple-touch-icon" href="icono.png">
     <link rel="manifest" href="manifest.json">
     
@@ -37,100 +36,118 @@
             font-family: -apple-system, BlinkMacSystemFont, sans-serif;
             background-color: var(--bg-body);
             color: var(--text-primary);
-            margin: 0;
-            padding-bottom: 40px;
+            margin: 0; padding-bottom: 40px;
+            transition: background 0.3s;
         }
 
-        .header { padding: calc(2.5rem + env(safe-area-inset-top)) 1.5rem 1rem; }
+        .header { padding: calc(2.5rem + env(safe-area-inset-top)) 1.5rem 1rem; position: relative; background: var(--bg-card); border-bottom: 1px solid var(--accent); }
         .page-title { font-size: 1.8rem; font-weight: 700; margin: 0; }
-        .section-header {
-            color: var(--text-secondary); font-size: 0.75rem; font-weight: 600;
-            text-transform: uppercase; letter-spacing: 1px; margin: 1.5rem 1.5rem 0.5rem;
+        
+        /* Menú Hamburguesa */
+        .menu-trigger {
+            position: absolute; top: calc(2.5rem + env(safe-area-inset-top)); right: 1.5rem;
+            background: none; border: none; color: var(--text-primary); font-size: 1.5rem; z-index: 1001;
         }
 
-        .menu-btn {
-            position: fixed; top: env(safe-area-inset-top, 20px); right: 15px; z-index: 1001;
-            background: none; border: none; color: var(--text-primary); font-size: 1.6rem;
+        .side-menu {
+            position: fixed; top: 0; right: -280px; width: 280px; height: 100%;
+            background: var(--bg-card); transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1); z-index: 1002;
+            padding: 80px 1.5rem 2rem; box-shadow: -10px 0 30px rgba(0,0,0,0.3);
+            display: flex; flex-direction: column;
         }
-
-        .nav-menu {
-            position: fixed; top: 0; left: -280px; width: 280px; height: 100%;
-            background: var(--bg-card); transition: 0.3s; z-index: 1000;
-            padding-top: calc(80px + env(safe-area-inset-top));
-            box-shadow: 10px 0 30px rgba(0,0,0,0.5);
+        .side-menu.active { right: 0; }
+        .menu-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.5); display: none; z-index: 1000;
         }
-        .nav-menu.active { left: 0; }
-        .nav-link { display: block; padding: 1.2rem; color: var(--text-primary); text-decoration: none; border-bottom: 1px solid var(--border); }
+        .menu-overlay.active { display: block; }
 
+        .menu-item {
+            background: none; border: none; color: var(--text-primary);
+            padding: 18px 0; text-align: left; font-size: 1rem;
+            border-bottom: 1px solid var(--border); width: 100%; cursor: pointer;
+        }
+        .dev-info { margin-top: auto; padding-top: 20px; font-size: 0.75rem; color: var(--text-secondary); line-height: 1.4; }
+
+        /* Contenedores */
         .main-container { padding: 0 1.5rem; }
+        .section-header { color: var(--text-secondary); font-size: 0.75rem; font-weight: 600; text-transform: uppercase; letter-spacing: 1px; margin: 1.5rem 0 0.5rem; }
+        .pet-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 1rem; }
+        .pet-card-btn { background: var(--bg-card); border: 1px solid var(--border); padding: 20px; border-radius: 20px; text-align: center; }
+        .pet-avatar-large { font-size: 3rem; display: block; margin-bottom: 10px; }
 
-        .pet-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 1rem; }
-        .pet-item-card {
-            background: var(--bg-card); border: 1px solid var(--border);
-            padding: 15px; border-radius: 16px; text-align: center;
-        }
-        .pet-item-card.active { border-color: var(--accent); background: rgba(74, 144, 226, 0.1); }
-        .pet-avatar { font-size: 2rem; display: block; }
-
-        .widgets-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
-        .widget-card {
-            background: var(--bg-card); padding: 1.2rem; border-radius: 16px; border: 1px solid var(--border);
-            display: flex; flex-direction: column; align-items: center; gap: 4px;
-        }
-
-        /* TARJETAS DE HISTORIAL ACTUALIZADAS */
-        .record-card {
-            background: var(--bg-card); border: 1px solid var(--border);
-            padding: 1.2rem; border-radius: 16px; margin-bottom: 1rem;
-        }
-        .record-actions {
-            display: flex; gap: 12px; margin-top: 10px; border-top: 1px solid var(--border); padding-top: 10px;
-        }
-        .btn-small {
-            background: none; border: none; font-size: 0.8rem; font-weight: 600; cursor: pointer; padding: 5px 0;
-        }
-        .btn-edit { color: var(--accent); }
-        .btn-delete { color: var(--danger); }
-
+        /* Perfil y Cards */
+        .bio-box { background: var(--bg-card); border: 1px solid var(--border); padding: 1.2rem; border-radius: 16px; margin-bottom: 1.5rem; }
+        .record-card { background: var(--bg-card); border: 1px solid var(--border); padding: 1rem; border-radius: 14px; margin-bottom: 10px; }
+        
         .view { display: none; }
         .view.active { display: block; }
+        .back-btn { background: none; border: none; color: var(--accent); font-weight: 600; margin-bottom: 10px; padding: 0; cursor: pointer; }
+        
         input, select, textarea, .btn-action {
             width: 100%; padding: 1rem; border-radius: 12px; border: 1px solid var(--border);
-            background: var(--bg-card); color: var(--text-primary); margin-top: 0.5rem; font-size: 1rem;
+            background: var(--bg-card); color: var(--text-primary); margin-top: 0.8rem; font-size: 1rem;
         }
-        .btn-action { background: var(--accent); border: none; font-weight: bold; margin-top: 1.5rem; }
-        
-        .overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); display: none; z-index: 999; }
-        .overlay.active { display: block; }
+        .btn-action { background: var(--accent); border: none; font-weight: bold; margin-top: 1.5rem; color: white; }
     </style>
 </head>
 <body>
 
-    <div class="overlay" id="overlay" onclick="toggleMenu()"></div>
-    <button class="menu-btn" onclick="toggleMenu()">☰</button>
-
-    <nav class="nav-menu" id="navMenu">
-        <a href="#" class="nav-link" onclick="showView('home')">🏠 Inicio</a>
-        <a href="#" class="nav-link" onclick="showView('add')">➕ Nueva Mascota</a>
-        <a href="#" class="nav-link" onclick="showView('settings')">⚙️ Ajustes / Exportar</a>
+    <div class="menu-overlay" id="overlay" onclick="toggleMenu()"></div>
+    <button class="menu-trigger" onclick="toggleMenu()">☰</button>
+    
+    <nav class="side-menu" id="sideMenu">
+        <button class="menu-item" onclick="safeGoHome()">🏠 Ir al Inicio</button>
+        <button class="menu-item" onclick="toggleTheme()">🌓 Cambiar Tema</button>
+        <button class="menu-item" onclick="exportData()">💾 Descargar Backup JSON</button>
+        <button class="menu-item" style="color:var(--danger)" onclick="clearAll()">⚠️ Borrar Todo</button>
+        
+        <div class="dev-info">
+            <strong>App realizada por AleCode®</strong> 2026
+            <a href="mailto:alxsalazar21@gmail.com">alxsalazar21@gmail.com</a>
+        </div>
     </nav>
 
     <div id="view-home" class="view active">
-        <header class="header"><h1 class="page-title">Mis mascotas 🐾</h1></header>
+        <header class="header"><h1 class="page-title">Pet Health 🐾</h1></header>
         <div class="main-container">
-            <div class="section-header">PELUDITAS</div>
             <div id="petGrid" class="pet-grid"></div>
+            <button class="btn-action" style="background:#444" onclick="showView('add')">➕ Nuevo Peludo</button>
+        </div>
+        <img src="icono.png" alt="Mascota" style="width:90%; opacity:0.8; margin: 5rem auto 0; display:block">
+    </div>
 
-            <div class="section-header">ACCIONES RÁPIDAS</div>
-            <div class="widgets-grid">
-                <div class="widget-card" onclick="openEventForm('Medicina', '💊')"><span>💊</span><b>Medicina</b></div>
-                <div class="widget-card" onclick="openEventForm('Peso', '⚖️')"><span>⚖️</span><b>Peso</b></div>
-                <div class="widget-card" onclick="openEventForm('Vacuna', '💉')"><span>💉</span><b>Vacuna</b></div>
-                <div class="widget-card" onclick="openEventForm('Veterinario', '🏥')"><span>🏥</span><b>Veterinario</b></div>
+    <div id="view-detail" class="view">
+        <header class="header">
+            <button class="back-btn" onclick="safeGoHome()">← Inicio</button>
+            <h1 class="page-title" id="detailPetName">Nombre</h1>
+        </header>
+        <div class="main-container">
+            <div class="section-header">Biografía</div>
+            <div class="bio-box" id="petBio"></div>
+            <div class="section-header">Nuevo Registro</div>
+            <div style="display:grid; grid-template-columns: repeat(4, 1fr); gap:10px">
+                <button class="pet-card-btn" style="padding:10px" onclick="openEventForm('Medicina', '💊')">💊</button>
+                <button class="pet-card-btn" style="padding:10px" onclick="openEventForm('Peso', '⚖️')">⚖️</button>
+                <button class="pet-card-btn" style="padding:10px" onclick="openEventForm('Vacuna', '💉')">💉</button>
+                <button class="pet-card-btn" style="padding:10px" onclick="openEventForm('Vet', '🏥')">🏥</button>
             </div>
+            <div class="section-header">Historial Médico</div>
+            <div id="detailLogs"></div>
+            <button class="btn-action" style="background:var(--danger); opacity:0.6; margin-top:3rem" onclick="deletePet()">Eliminar Peludo</button>
+        </div>
+    </div>
 
-            <div class="section-header">HISTORIAL</div>
-            <div id="recentLogs"></div>
+    <div id="view-add" class="view">
+        <header class="header"><h1 class="page-title">Perfil</h1></header>
+        <div class="main-container">
+            <input type="text" id="petName" placeholder="Nombre" oninput="markDirty()">
+            <input type="date" id="petBirth" oninput="markDirty()">
+            <input type="text" id="petBreed" placeholder="Raza" oninput="markDirty()">
+            <input type="text" id="petColor" placeholder="Color" oninput="markDirty()">
+            <select id="petType" oninput="markDirty()"><option value="Perro">Perro 🐶</option><option value="Gato">Gato 🐱</option></select>
+            <textarea id="petNotes" placeholder="Comida, gustos, notas..." style="height:100px" oninput="markDirty()"></textarea>
+            <button class="btn-action" onclick="savePet()">Guardar Perfil</button>
         </div>
     </div>
 
@@ -138,50 +155,48 @@
         <header class="header"><h1 class="page-title" id="eventHeader">Registro</h1></header>
         <div class="main-container">
             <input type="hidden" id="editingLogId">
-            <label style="font-size:0.8rem; color:var(--text-secondary)">Fecha:</label>
-            <input type="date" id="eventDate">
-            <textarea id="eventNote" placeholder="Detalles..." style="height:120px; margin-top:10px;"></textarea>
-            <button class="btn-action" id="btnSaveLog" onclick="saveLog()">Guardar Registro</button>
-            <button class="btn-action" style="background:#444" onclick="showView('home')">Cancelar</button>
-        </div>
-    </div>
-
-    <div id="view-add" class="view">
-        <header class="header"><h1 class="page-title">Nueva Mascota</h1></header>
-        <div class="main-container">
-            <input type="text" id="petName" placeholder="Nombre">
-            <input type="date" id="petBirth">
-            <select id="petType"><option value="Perro">Perro 🐶</option><option value="Gato">Gato 🐱</option></select>
-            <button class="btn-action" onclick="savePet()">Crear Perfil</button>
-        </div>
-    </div>
-
-    <div id="view-settings" class="view">
-        <header class="header"><h1 class="page-title">Ajustes</h1></header>
-        <div class="main-container">
-            <button class="btn-action" style="background:#444" onclick="toggleTheme()">Cambiar Tema</button>
-            <button class="btn-action" style="background:#28a745" onclick="exportData()">Exportar JSON</button>
-            <button class="btn-action" style="background:var(--danger)" onclick="if(confirm('¿Borrar todo?')) {localStorage.clear(); location.reload();}">Borrar todo</button>
+            <input type="date" id="eventDate" oninput="markDirty()">
+            <textarea id="eventNote" placeholder="Detalles..." style="height:150px; margin-top:15px;" oninput="markDirty()"></textarea>
+            <button class="btn-action" id="btnSaveLog" onclick="saveLog()">Guardar</button>
         </div>
     </div>
 
     <script>
-        let db = JSON.parse(localStorage.getItem('pet_db_v5')) || { pets: [], logs: [] };
-        let currentSelectedPetId = null;
+        let db = JSON.parse(localStorage.getItem('pet_db_v6')) || { pets: [], logs: [] };
+        let currentPetId = null;
         let currentEventType = '';
+        let isDirty = false; // Rastreador de cambios
 
-        function toggleMenu() { document.getElementById('navMenu').classList.toggle('active'); document.getElementById('overlay').classList.toggle('active'); }
+        function toggleMenu() {
+            document.getElementById('sideMenu').classList.toggle('active');
+            document.getElementById('overlay').classList.toggle('active');
+        }
+
+        function markDirty() { isDirty = true; }
+
+        function safeGoHome() {
+            if (isDirty) {
+                const proceed = confirm("Tienes información sin guardar. ¿Seguro que quieres volver al inicio y descartar los cambios?");
+                if (!proceed) {
+                    if(document.getElementById('sideMenu').classList.contains('active')) toggleMenu();
+                    return;
+                }
+            }
+            isDirty = false;
+            showView('home');
+        }
 
         function showView(viewId) {
             document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
             document.getElementById('view-' + viewId).classList.add('active');
-            if(document.getElementById('navMenu').classList.contains('active')) toggleMenu();
+            if(document.getElementById('sideMenu').classList.contains('active')) toggleMenu();
             if(viewId === 'home') renderHome();
+            if(viewId === 'detail') renderDetail();
         }
 
-        function calculateAge(birthDate, referenceDate) {
+        function calculateAge(birthDate, refDate = new Date()) {
             const birth = new Date(birthDate);
-            const ref = new Date(referenceDate);
+            const ref = new Date(refDate);
             let age = ref.getFullYear() - birth.getFullYear();
             if (ref.getMonth() < birth.getMonth() || (ref.getMonth() === birth.getMonth() && ref.getDate() < birth.getDate())) age--;
             return age < 0 ? 0 : age;
@@ -190,104 +205,107 @@
         function savePet() {
             const name = document.getElementById('petName').value;
             const birth = document.getElementById('petBirth').value;
-            if(!name || !birth) return;
-            const newPet = { id: Date.now(), name, birth, type: document.getElementById('petType').value };
-            db.pets.push(newPet);
-            if(!currentSelectedPetId) currentSelectedPetId = newPet.id;
-            saveDB(); showView('home');
+            if(!name || !birth) return alert("Faltan datos obligatorios");
+            
+            db.pets.push({
+                id: Date.now(), name, birth,
+                breed: document.getElementById('petBreed').value || '-',
+                color: document.getElementById('petColor').value || '-',
+                type: document.getElementById('petType').value,
+                notes: document.getElementById('petNotes').value || 'Sin notas'
+            });
+            saveDB();
+            isDirty = false;
+            showView('home');
         }
 
         function openEventForm(type, icon, logId = null) {
-            if(!currentSelectedPetId) return alert("Selecciona una mascota");
             currentEventType = type;
             document.getElementById('eventHeader').innerText = icon + " " + type;
-            
+            isDirty = false;
             if(logId) {
-                // MODO EDICIÓN
                 const log = db.logs.find(l => l.id === logId);
                 document.getElementById('editingLogId').value = logId;
                 document.getElementById('eventDate').value = log.date;
                 document.getElementById('eventNote').value = log.note;
-                document.getElementById('btnSaveLog').innerText = "Actualizar Cambios";
             } else {
-                // MODO NUEVO
                 document.getElementById('editingLogId').value = "";
                 document.getElementById('eventDate').valueAsDate = new Date();
                 document.getElementById('eventNote').value = "";
-                document.getElementById('btnSaveLog').innerText = "Guardar Registro";
             }
             showView('event');
         }
 
         function saveLog() {
-            const pet = db.pets.find(p => p.id === currentSelectedPetId);
             const note = document.getElementById('eventNote').value;
             const date = document.getElementById('eventDate').value;
             const logId = document.getElementById('editingLogId').value;
-
-            if(!note || !date) return alert("Completa los datos");
-
-            const ageAtEvent = calculateAge(pet.birth, date);
+            const pet = db.pets.find(p => p.id === currentPetId);
+            const age = calculateAge(pet.birth, date);
 
             if(logId) {
-                // Actualizar existente
-                const index = db.logs.findIndex(l => l.id == logId);
-                db.logs[index].note = note;
-                db.logs[index].date = date;
-                db.logs[index].frozenAge = ageAtEvent;
+                const idx = db.logs.findIndex(l => l.id == logId);
+                db.logs[idx] = {...db.logs[idx], note, date, frozenAge: age};
             } else {
-                // Crear nuevo
-                db.logs.unshift({ id: Date.now(), petId: pet.id, type: currentEventType, note, date, frozenAge: ageAtEvent });
+                db.logs.unshift({ id: Date.now(), petId: currentPetId, type: currentEventType, note, date, frozenAge: age });
             }
-
-            saveDB(); showView('home');
-        }
-
-        function deleteLog(id) {
-            if(confirm("¿Borrar esta entrada del historial?")) {
-                db.logs = db.logs.filter(l => l.id !== id);
-                saveDB(); renderHome();
-            }
+            saveDB();
+            isDirty = false;
+            showView('detail');
         }
 
         function renderHome() {
             const grid = document.getElementById('petGrid');
-            grid.innerHTML = db.pets.length ? '' : '<p style="grid-column:1/3">No hay mascotas.</p>';
-            if(db.pets.length && !currentSelectedPetId) currentSelectedPetId = db.pets[0].id;
-
-            db.pets.forEach(pet => {
-                grid.innerHTML += `
-                    <div class="pet-item-card ${pet.id === currentSelectedPetId ? 'active' : ''}" onclick="selectPet(${pet.id})">
-                        <span class="pet-avatar">${pet.type.includes('Gato') ? '🐱' : '🐶'}</span>
-                        <small>${pet.name}</small>
-                    </div>`;
-            });
-
-            const logsDiv = document.getElementById('recentLogs');
-            const filtered = db.logs.filter(l => l.petId === currentSelectedPetId);
-            logsDiv.innerHTML = filtered.map(log => `
-                <div class="record-card">
-                    <div style="display:flex; justify-content:space-between">
-                        <strong>${log.type}</strong>
-                        <span style="color:var(--accent); font-size:0.75rem">Tenía ${log.frozenAge} años</span>
-                    </div>
-                    <p style="font-size:0.9rem; margin:8px 0">${log.note}</p>
-                    <small style="color:var(--text-secondary)">${log.date}</small>
-                    <div class="record-actions">
-                        <button class="btn-small btn-edit" onclick="openEventForm('${log.type}', '✏️', ${log.id})">EDITAR</button>
-                        <button class="btn-small btn-delete" onclick="deleteLog(${log.id})">BORRAR</button>
-                    </div>
-                </div>`).join('') || '<p>Sin registros.</p>';
+            grid.innerHTML = db.pets.map(p => `
+                <div class="pet-card-btn" onclick="openPet(${p.id})">
+                    <span class="pet-avatar-large">${p.type.includes('Gato') ? '🐱' : '🐶'}</span>
+                    <strong>${p.name}</strong>
+                </div>
+            `).join('') || '<p style="color:gray">Presiona "+" para añadir.</p>';
         }
 
-        function selectPet(id) { currentSelectedPetId = id; renderHome(); }
-        function saveDB() { localStorage.setItem('pet_db_v5', JSON.stringify(db)); }
-        function toggleTheme() { document.body.setAttribute('data-theme', document.body.getAttribute('data-theme') === 'light' ? 'dark' : 'light'); }
+        function openPet(id) { currentPetId = id; showView('detail'); }
+
+        function renderDetail() {
+            const pet = db.pets.find(p => p.id === currentPetId);
+            document.getElementById('detailPetName').innerText = pet.name;
+            document.getElementById('petBio').innerHTML = `
+                <div style="font-size:0.9rem">
+                    <div><strong>Raza:</strong> ${pet.breed}</div>
+                    <div><strong>Color:</strong> ${pet.color}</div>
+                    <div><strong>Edad actual:</strong> ${calculateAge(pet.birth)} años</div>
+                    <div style="margin-top:8px; color:var(--text-secondary)">${pet.notes}</div>
+                </div>
+            `;
+            const logs = db.logs.filter(l => l.petId === currentPetId);
+            document.getElementById('detailLogs').innerHTML = logs.map(l => `
+                <div class="record-card">
+                    <div style="display:flex; justify-content:space-between"><strong>${l.type}</strong><span>${l.frozenAge} años</span></div>
+                    <p style="font-size:0.85rem; margin:8px 0">${l.note}</p>
+                    <small style="color:var(--text-secondary)">${l.date}</small>
+                    <div style="margin-top:10px">
+                        <button onclick="openEventForm('${l.type}', '✏️', ${l.id})" style="background:none; border:none; color:var(--accent); font-size:0.7rem">EDITAR</button>
+                        <button onclick="deleteLog(${l.id})" style="background:none; border:none; color:var(--danger); font-size:0.7rem; margin-left:10px">BORRAR</button>
+                    </div>
+                </div>
+            `).join('') || '<p>Sin registros.</p>';
+        }
+
+        function deleteLog(id) { if(confirm("¿Borrar?")) { db.logs = db.logs.filter(l => l.id !== id); saveDB(); renderDetail(); } }
+        function deletePet() { if(confirm("¿Borrar perfil?")) { db.pets = db.pets.filter(p => p.id !== currentPetId); db.logs = db.logs.filter(l => l.petId !== currentPetId); saveDB(); showView('home'); } }
+        function saveDB() { localStorage.setItem('pet_db_v6', JSON.stringify(db)); }
+        function toggleTheme() {
+            const body = document.body;
+            body.setAttribute('data-theme', body.getAttribute('data-theme') === 'light' ? 'dark' : 'light');
+            toggleMenu();
+        }
         function exportData() {
             const blob = new Blob([JSON.stringify(db)], {type: "application/json"});
             const url = URL.createObjectURL(blob);
-            const a = document.createElement('a'); a.href = url; a.download = "pets_backup.json"; a.click();
+            const a = document.createElement('a'); a.href = url; a.download = "descargar_datos.json"; a.click();
+            toggleMenu();
         }
+        function clearAll() { if(confirm("¿Borrar TODO definitivamente?")) { localStorage.clear(); location.reload(); } }
 
         renderHome();
     </script>
