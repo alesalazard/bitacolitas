@@ -2,13 +2,12 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>PetHealth Pro</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>PetHealth Pro v5</title>
     
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="PetHealth">
-    
     <link rel="apple-touch-icon" href="icono.png">
     <link rel="manifest" href="manifest.json">
     
@@ -20,6 +19,7 @@
             --text-secondary: #8b9bb4;
             --accent: #4a90e2;
             --border: #2a3547;
+            --danger: #ff4d4f;
         }
 
         [data-theme="light"] {
@@ -29,72 +29,69 @@
             --text-secondary: #657786;
             --accent: #1da1f2;
             --border: #e1e8ed;
+            --danger: #d9363e;
         }
 
-        * { box-sizing: border-box; }
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
         body {
             font-family: -apple-system, BlinkMacSystemFont, sans-serif;
             background-color: var(--bg-body);
             color: var(--text-primary);
             margin: 0;
-            padding-bottom: 30px;
+            padding-bottom: 40px;
         }
 
-        /* HEADER ESTILO IMAGEN */
         .header { padding: calc(2.5rem + env(safe-area-inset-top)) 1.5rem 1rem; }
-        .good-morning { color: var(--text-secondary); font-size: 0.9rem; margin: 0; }
-        .page-title { font-size: 1.8rem; font-weight: 700; margin-top: 5px; }
-
+        .page-title { font-size: 1.8rem; font-weight: 700; margin: 0; }
         .section-header {
             color: var(--text-secondary); font-size: 0.75rem; font-weight: 600;
             text-transform: uppercase; letter-spacing: 1px; margin: 1.5rem 1.5rem 0.5rem;
         }
 
-        /* BOTÓN HAMBURGUESA */
         .menu-btn {
             position: fixed; top: env(safe-area-inset-top, 20px); right: 15px; z-index: 1001;
-            background: none; border: none; color: var(--text-primary); font-size: 1.6rem; padding: 10px;
+            background: none; border: none; color: var(--text-primary); font-size: 1.6rem;
         }
 
-        /* NAV MENU */
         .nav-menu {
             position: fixed; top: 0; left: -280px; width: 280px; height: 100%;
-            background: var(--bg-card); transition: 0.3s ease-out; z-index: 1000;
+            background: var(--bg-card); transition: 0.3s; z-index: 1000;
             padding-top: calc(80px + env(safe-area-inset-top));
             box-shadow: 10px 0 30px rgba(0,0,0,0.5);
         }
         .nav-menu.active { left: 0; }
-        .nav-link {
-            display: flex; align-items: center; gap: 15px; padding: 1.2rem;
-            color: var(--text-primary); text-decoration: none; border-bottom: 1px solid var(--border);
-        }
+        .nav-link { display: block; padding: 1.2rem; color: var(--text-primary); text-decoration: none; border-bottom: 1px solid var(--border); }
 
-        /* DASHBOARD WIDGETS */
         .main-container { padding: 0 1.5rem; }
-        .widgets-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-top: 0.5rem; }
+
+        .pet-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 1rem; }
+        .pet-item-card {
+            background: var(--bg-card); border: 1px solid var(--border);
+            padding: 15px; border-radius: 16px; text-align: center;
+        }
+        .pet-item-card.active { border-color: var(--accent); background: rgba(74, 144, 226, 0.1); }
+        .pet-avatar { font-size: 2rem; display: block; }
+
+        .widgets-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
         .widget-card {
             background: var(--bg-card); padding: 1.2rem; border-radius: 16px; border: 1px solid var(--border);
-            text-decoration: none; display: flex; flex-direction: column; gap: 4px;
+            display: flex; flex-direction: column; align-items: center; gap: 4px;
         }
-        .widget-icon { font-size: 1.5rem; margin-bottom: 5px; }
-        .widget-title { font-size: 0.95rem; font-weight: 600; color: var(--text-primary); }
-        .widget-desc { font-size: 0.75rem; color: var(--text-secondary); margin: 0; }
 
-        /* LISTA DE REGISTROS */
-        .empty-state {
-            display: flex; flex-direction: column; align-items: center; padding: 3rem 0;
-            color: var(--text-secondary); text-align: center;
-        }
+        /* TARJETAS DE HISTORIAL ACTUALIZADAS */
         .record-card {
             background: var(--bg-card); border: 1px solid var(--border);
-            padding: 1rem; border-radius: 12px; margin-bottom: 0.8rem;
+            padding: 1.2rem; border-radius: 16px; margin-bottom: 1rem;
         }
-        .age-snapshot {
-            background: rgba(74, 144, 226, 0.15); color: var(--accent);
-            padding: 2px 6px; border-radius: 4px; font-size: 0.7rem; font-weight: bold;
+        .record-actions {
+            display: flex; gap: 12px; margin-top: 10px; border-top: 1px solid var(--border); padding-top: 10px;
         }
+        .btn-small {
+            background: none; border: none; font-size: 0.8rem; font-weight: 600; cursor: pointer; padding: 5px 0;
+        }
+        .btn-edit { color: var(--accent); }
+        .btn-delete { color: var(--danger); }
 
-        /* FORMS */
         .view { display: none; }
         .view.active { display: block; }
         input, select, textarea, .btn-action {
@@ -103,10 +100,7 @@
         }
         .btn-action { background: var(--accent); border: none; font-weight: bold; margin-top: 1.5rem; }
         
-        .overlay {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.5); display: none; z-index: 999;
-        }
+        .overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); display: none; z-index: 999; }
         .overlay.active { display: block; }
     </style>
 </head>
@@ -117,93 +111,66 @@
 
     <nav class="nav-menu" id="navMenu">
         <a href="#" class="nav-link" onclick="showView('home')">🏠 Inicio</a>
-        <a href="#" class="nav-link" onclick="showView('add')">➕ Agregar Peluda</a>
+        <a href="#" class="nav-link" onclick="showView('add')">➕ Nueva Mascota</a>
         <a href="#" class="nav-link" onclick="showView('settings')">⚙️ Ajustes / Exportar</a>
     </nav>
 
     <div id="view-home" class="view active">
-        <header class="header">
-            <h4 class="good-morning">Hola Ale</h4>
-            <h1 class="page-title">Mis peludas 🐾</h1>
-        </header>
-
+        <header class="header"><h1 class="page-title">Mis mascotas 🐾</h1></header>
         <div class="main-container">
-            <div class="section-header">PELUDAS</div>
-            <div id="petSelectorContainer" style="margin-bottom: 1rem;">
-                </div>
+            <div class="section-header">PELUDITAS</div>
+            <div id="petGrid" class="pet-grid"></div>
 
             <div class="section-header">ACCIONES RÁPIDAS</div>
             <div class="widgets-grid">
-                <div class="widget-card" onclick="openEventForm('Medicina')">
-                    <span class="widget-icon">💊</span>
-                    <span class="widget-title">Medicina</span>
-                    <p class="widget-desc">Dosis y frecuencia</p>
-                </div>
-                <div class="widget-card" onclick="openEventForm('Peso')">
-                    <span class="widget-icon">⚖️</span>
-                    <span class="widget-title">Peso</span>
-                    <p class="widget-desc">Control de evolución</p>
-                </div>
-                <div class="widget-card" onclick="openEventForm('Vacuna')">
-                    <span class="widget-icon">💉</span>
-                    <span class="widget-title">Vacuna</span>
-                    <p class="widget-desc">Fecha y lote</p>
-                </div>
-                <div class="widget-card" onclick="openEventForm('Veterinario')">
-                    <span class="widget-icon">🏥</span>
-                    <span class="widget-title">Veterinario</span>
-                    <p class="widget-desc">Notas de consulta</p>
-                </div>
+                <div class="widget-card" onclick="openEventForm('Medicina', '💊')"><span>💊</span><b>Medicina</b></div>
+                <div class="widget-card" onclick="openEventForm('Peso', '⚖️')"><span>⚖️</span><b>Peso</b></div>
+                <div class="widget-card" onclick="openEventForm('Vacuna', '💉')"><span>💉</span><b>Vacuna</b></div>
+                <div class="widget-card" onclick="openEventForm('Veterinario', '🏥')"><span>🏥</span><b>Veterinario</b></div>
             </div>
 
-            <div class="section-header">REGISTROS RECIENTES</div>
-            <div id="recentLogs">
-                </div>
-        </div>
-    </div>
-
-    <div id="view-add" class="view">
-        <header class="header"><h1 class="page-title">Nueva Peluda🐾</h1></header>
-        <div class="main-container">
-            <input type="text" id="petName" placeholder="Nombre (ej. Lucas)">
-            <label style="display:block; margin-top:10px; font-size:0.8rem; color:var(--text-secondary)">Fecha de Nacimiento:</label>
-            <input type="date" id="petBirth">
-            <select id="petType">
-                <option value="Perro">Perro</option>
-                <option value="Gato">Gato</option>
-            </select>
-            <button class="btn-action" onclick="savePet()">Guardar Peluda</button>
+            <div class="section-header">HISTORIAL</div>
+            <div id="recentLogs"></div>
         </div>
     </div>
 
     <div id="view-event" class="view">
         <header class="header"><h1 class="page-title" id="eventHeader">Registro</h1></header>
         <div class="main-container">
-            <p id="eventSub" style="color:var(--text-secondary)"></p>
-            <textarea id="eventNote" placeholder="Escribe los detalles aquí..." style="height:150px;"></textarea>
-            <button class="btn-action" onclick="saveLog()">Guardar Registro</button>
+            <input type="hidden" id="editingLogId">
+            <label style="font-size:0.8rem; color:var(--text-secondary)">Fecha:</label>
+            <input type="date" id="eventDate">
+            <textarea id="eventNote" placeholder="Detalles..." style="height:120px; margin-top:10px;"></textarea>
+            <button class="btn-action" id="btnSaveLog" onclick="saveLog()">Guardar Registro</button>
             <button class="btn-action" style="background:#444" onclick="showView('home')">Cancelar</button>
         </div>
     </div>
 
-    <div id="view-settings" class="view">
-        <header class="header"><h1 class="page-title">Ajustes ⚙️</h1></header>
+    <div id="view-add" class="view">
+        <header class="header"><h1 class="page-title">Nueva Mascota</h1></header>
         <div class="main-container">
-            <button class="btn-action" style="background:#444" onclick="toggleTheme()">Cambiar Claro/Oscuro</button>
-            <button class="btn-action" style="background:#28a745" onclick="exportData()">Descargar Backup JSON</button>
-            <button class="btn-action" style="background:#d9534f" onclick="clearAll()">Borrar todo</button>
+            <input type="text" id="petName" placeholder="Nombre">
+            <input type="date" id="petBirth">
+            <select id="petType"><option value="Perro">Perro 🐶</option><option value="Gato">Gato 🐱</option></select>
+            <button class="btn-action" onclick="savePet()">Crear Perfil</button>
+        </div>
+    </div>
+
+    <div id="view-settings" class="view">
+        <header class="header"><h1 class="page-title">Ajustes</h1></header>
+        <div class="main-container">
+            <button class="btn-action" style="background:#444" onclick="toggleTheme()">Cambiar Tema</button>
+            <button class="btn-action" style="background:#28a745" onclick="exportData()">Exportar JSON</button>
+            <button class="btn-action" style="background:var(--danger)" onclick="if(confirm('¿Borrar todo?')) {localStorage.clear(); location.reload();}">Borrar todo</button>
         </div>
     </div>
 
     <script>
-        let db = JSON.parse(localStorage.getItem('pet_db_v3')) || { pets: [], logs: [] };
+        let db = JSON.parse(localStorage.getItem('pet_db_v5')) || { pets: [], logs: [] };
         let currentSelectedPetId = null;
         let currentEventType = '';
 
-        function toggleMenu() {
-            document.getElementById('navMenu').classList.toggle('active');
-            document.getElementById('overlay').classList.toggle('active');
-        }
+        function toggleMenu() { document.getElementById('navMenu').classList.toggle('active'); document.getElementById('overlay').classList.toggle('active'); }
 
         function showView(viewId) {
             document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
@@ -212,124 +179,114 @@
             if(viewId === 'home') renderHome();
         }
 
-        function calculateAge(birthDate, targetDate = new Date()) {
+        function calculateAge(birthDate, referenceDate) {
             const birth = new Date(birthDate);
-            const now = new Date(targetDate);
-            let age = now.getFullYear() - birth.getFullYear();
-            const m = now.getMonth() - birth.getMonth();
-            if (m < 0 || (m === 0 && now.getDate() < birth.getDate())) age--;
+            const ref = new Date(referenceDate);
+            let age = ref.getFullYear() - birth.getFullYear();
+            if (ref.getMonth() < birth.getMonth() || (ref.getMonth() === birth.getMonth() && ref.getDate() < birth.getDate())) age--;
             return age < 0 ? 0 : age;
         }
 
         function savePet() {
             const name = document.getElementById('petName').value;
             const birth = document.getElementById('petBirth').value;
-            if(!name || !birth) return alert("Faltan datos");
-
+            if(!name || !birth) return;
             const newPet = { id: Date.now(), name, birth, type: document.getElementById('petType').value };
             db.pets.push(newPet);
             if(!currentSelectedPetId) currentSelectedPetId = newPet.id;
-            saveDB();
-            showView('home');
+            saveDB(); showView('home');
         }
 
-        function openEventForm(type) {
-            if(!currentSelectedPetId) return alert("Primero agrega una peluda");
+        function openEventForm(type, icon, logId = null) {
+            if(!currentSelectedPetId) return alert("Selecciona una mascota");
             currentEventType = type;
-            const pet = db.pets.find(p => p.id === currentSelectedPetId);
-            document.getElementById('eventHeader').innerText = type;
-            document.getElementById('eventSub').innerText = "Registrando para " + pet.name;
+            document.getElementById('eventHeader').innerText = icon + " " + type;
+            
+            if(logId) {
+                // MODO EDICIÓN
+                const log = db.logs.find(l => l.id === logId);
+                document.getElementById('editingLogId').value = logId;
+                document.getElementById('eventDate').value = log.date;
+                document.getElementById('eventNote').value = log.note;
+                document.getElementById('btnSaveLog').innerText = "Actualizar Cambios";
+            } else {
+                // MODO NUEVO
+                document.getElementById('editingLogId').value = "";
+                document.getElementById('eventDate').valueAsDate = new Date();
+                document.getElementById('eventNote').value = "";
+                document.getElementById('btnSaveLog').innerText = "Guardar Registro";
+            }
             showView('event');
         }
 
         function saveLog() {
             const pet = db.pets.find(p => p.id === currentSelectedPetId);
             const note = document.getElementById('eventNote').value;
-            if(!note) return alert("Escribe una nota");
+            const date = document.getElementById('eventDate').value;
+            const logId = document.getElementById('editingLogId').value;
 
-            // PERSISTENCIA DE EDAD: Calculamos hoy y lo guardamos fijo
-            const ageAtMoment = calculateAge(pet.birth);
+            if(!note || !date) return alert("Completa los datos");
 
-            const newLog = {
-                id: Date.now(),
-                petId: pet.id,
-                petName: pet.name,
-                type: currentEventType,
-                note: note,
-                date: new Date().toLocaleDateString(),
-                frozenAge: ageAtMoment // <--- Esto no cambiará nunca
-            };
+            const ageAtEvent = calculateAge(pet.birth, date);
 
-            db.logs.unshift(newLog);
-            saveDB();
-            document.getElementById('eventNote').value = '';
-            showView('home');
+            if(logId) {
+                // Actualizar existente
+                const index = db.logs.findIndex(l => l.id == logId);
+                db.logs[index].note = note;
+                db.logs[index].date = date;
+                db.logs[index].frozenAge = ageAtEvent;
+            } else {
+                // Crear nuevo
+                db.logs.unshift({ id: Date.now(), petId: pet.id, type: currentEventType, note, date, frozenAge: ageAtEvent });
+            }
+
+            saveDB(); showView('home');
+        }
+
+        function deleteLog(id) {
+            if(confirm("¿Borrar esta entrada del historial?")) {
+                db.logs = db.logs.filter(l => l.id !== id);
+                saveDB(); renderHome();
+            }
         }
 
         function renderHome() {
-            const selector = document.getElementById('petSelectorContainer');
-            selector.innerHTML = '';
-            
-            if(db.pets.length === 0) {
-                currentSelectedPetId = null;
-            } else {
-                if(!currentSelectedPetId) currentSelectedPetId = db.pets[0].id;
-                
-                db.pets.forEach(pet => {
-                    const age = calculateAge(pet.birth);
-                    const isSel = pet.id === currentSelectedPetId;
-                    selector.innerHTML += `
-                        <button onclick="selectPet(${pet.id})" style="background:${isSel ? 'var(--accent)' : 'var(--bg-card)'}; color:white; border:1px solid var(--border); padding:8px 15px; border-radius:20px; margin-right:5px; font-size:0.8rem">
-                            ${pet.name} (${age} años)
-                        </button>
-                    `;
-                });
-            }
+            const grid = document.getElementById('petGrid');
+            grid.innerHTML = db.pets.length ? '' : '<p style="grid-column:1/3">No hay mascotas.</p>';
+            if(db.pets.length && !currentSelectedPetId) currentSelectedPetId = db.pets[0].id;
+
+            db.pets.forEach(pet => {
+                grid.innerHTML += `
+                    <div class="pet-item-card ${pet.id === currentSelectedPetId ? 'active' : ''}" onclick="selectPet(${pet.id})">
+                        <span class="pet-avatar">${pet.type.includes('Gato') ? '🐱' : '🐶'}</span>
+                        <small>${pet.name}</small>
+                    </div>`;
+            });
 
             const logsDiv = document.getElementById('recentLogs');
-            const filteredLogs = db.logs.filter(l => l.petId === currentSelectedPetId);
-
-            if(filteredLogs.length === 0) {
-                logsDiv.innerHTML = `<div class="empty-state">📋 No hay registros para esta peluda.</div>`;
-            } else {
-                logsDiv.innerHTML = filteredLogs.map(log => `
-                    <div class="record-card">
-                        <div style="display:flex; justify-content:space-between; align-items:start">
-                            <strong>${log.type}</strong>
-                            <span class="age-snapshot">${log.frozenAge} años</span>
-                        </div>
-                        <p style="margin:5px 0; font-size:0.9rem">${log.note}</p>
-                        <small style="color:var(--text-secondary)">${log.date}</small>
+            const filtered = db.logs.filter(l => l.petId === currentSelectedPetId);
+            logsDiv.innerHTML = filtered.map(log => `
+                <div class="record-card">
+                    <div style="display:flex; justify-content:space-between">
+                        <strong>${log.type}</strong>
+                        <span style="color:var(--accent); font-size:0.75rem">Tenía ${log.frozenAge} años</span>
                     </div>
-                `).join('');
-            }
+                    <p style="font-size:0.9rem; margin:8px 0">${log.note}</p>
+                    <small style="color:var(--text-secondary)">${log.date}</small>
+                    <div class="record-actions">
+                        <button class="btn-small btn-edit" onclick="openEventForm('${log.type}', '✏️', ${log.id})">EDITAR</button>
+                        <button class="btn-small btn-delete" onclick="deleteLog(${log.id})">BORRAR</button>
+                    </div>
+                </div>`).join('') || '<p>Sin registros.</p>';
         }
 
-        function selectPet(id) {
-            currentSelectedPetId = id;
-            renderHome();
-        }
-
-        function saveDB() { localStorage.setItem('pet_db_v3', JSON.stringify(db)); }
-
-        function toggleTheme() {
-            const b = document.body;
-            b.setAttribute('data-theme', b.getAttribute('data-theme') === 'light' ? 'dark' : 'light');
-        }
-
+        function selectPet(id) { currentSelectedPetId = id; renderHome(); }
+        function saveDB() { localStorage.setItem('pet_db_v5', JSON.stringify(db)); }
+        function toggleTheme() { document.body.setAttribute('data-theme', document.body.getAttribute('data-theme') === 'light' ? 'dark' : 'light'); }
         function exportData() {
-            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(db));
-            const dl = document.createElement('a');
-            dl.setAttribute("href", dataStr);
-            dl.setAttribute("download", "peludas_reporte.json");
-            dl.click();
-        }
-
-        function clearAll() {
-            if(confirm("¿Borrar todo definitivamente?")) {
-                localStorage.removeItem('pet_db_v3');
-                location.reload();
-            }
+            const blob = new Blob([JSON.stringify(db)], {type: "application/json"});
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a'); a.href = url; a.download = "pets_backup.json"; a.click();
         }
 
         renderHome();
