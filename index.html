@@ -3,11 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-    <title>PetHealth Pro v6.2</title>
+    <title>Bitacolitas v6.3</title>
     
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <link rel="apple-touch-icon" href="icono.png">
+    <link rel="apple-touch-icon" href="iconpet2.png">
     <link rel="manifest" href="manifest.json">
     
     <style>
@@ -41,7 +41,8 @@
         }
 
         .header { padding: calc(2.5rem + env(safe-area-inset-top)) 1.5rem 1rem; position: relative; background: var(--bg-card); border-bottom: 1px solid var(--accent); }
-        .page-title { font-size: 1.8rem; font-weight: 700; margin: 0; }
+        .page-title { font-size: 1.8rem; font-weight: 700; display: flex; flex-direction: column; align-items: center; }
+        .page-subtitle { font-size: 0.9rem; color: var(--text-secondary); margin-top: -10px; display: flex; justify-content: center;}
         
         /* Menú Hamburguesa */
         .menu-trigger {
@@ -73,7 +74,7 @@
         .main-container { padding: 0 1.5rem; }
         .section-header { color: var(--text-secondary); font-size: 0.75rem; font-weight: 600; text-transform: uppercase; letter-spacing: 1px; margin: 1.5rem 0 0.5rem; }
         .pet-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 1rem; }
-        .pet-card-btn { background: var(--bg-card); border: 1px solid var(--border); padding: 20px; border-radius: 20px; text-align: center; }
+        .pet-card-btn { background: var(--bg-card); border: 1px solid var(--border); padding: 20px; border-radius: 20px; text-align: center; color: var(--text-secondary); }
         .pet-avatar-large { font-size: 3rem; display: block; margin-bottom: 10px; }
 
         /* Perfil y Cards */
@@ -89,10 +90,12 @@
             background: var(--bg-card); color: var(--text-primary); margin-top: 0.8rem; font-size: 1rem;
         }
         .btn-action { background: var(--accent); border: none; font-weight: bold; margin-top: 1.5rem; color: white; }
+
+        .img-icon { display:flex; align-items:center; justify-content:center; margin-bottom:10px }
+        .emoji-paws { height: 100px; }
     </style>
 </head>
 <body>
-
     <div class="menu-overlay" id="overlay" onclick="toggleMenu()"></div>
     <button class="menu-trigger" onclick="toggleMenu()">☰</button>
     
@@ -109,12 +112,14 @@
     </nav>
 
     <div id="view-home" class="view active">
-        <header class="header"><h1 class="page-title">Pet Health 🐾</h1></header>
+        <header class="header">
+            <div class="img-icon"><img src="icon2.png" alt="icono-patita" class="emoji-paws"></div>
+            <h1 class="page-title">Bitacolitas </h1>
+            <h4 class="page-subtitle">La bitácora de tus mascotas</h4></header>
         <div class="main-container">
             <div id="petGrid" class="pet-grid"></div>
-            <button class="btn-action" style="background:#444" onclick="showView('add')">➕ Nuevo Peludo</button>
+            <button class="btn-action" style="background:#444" onclick="showView('add')">➕ Nueva Bitácora peluda</button>
         </div>
-        <img src="icono.png" alt="Mascota" style="width:90%; opacity:0.8; margin: 5rem auto 0; display:block">
     </div>
 
     <div id="view-detail" class="view">
@@ -127,10 +132,10 @@
             <div class="bio-box" id="petBio"></div>
             <div class="section-header">Nuevo Registro</div>
             <div style="display:grid; grid-template-columns: repeat(4, 1fr); gap:10px">
-                <button class="pet-card-btn" style="padding:10px" onclick="openEventForm('Medicina', '💊')">💊</button>
-                <button class="pet-card-btn" style="padding:10px" onclick="openEventForm('Peso', '⚖️')">⚖️</button>
-                <button class="pet-card-btn" style="padding:10px" onclick="openEventForm('Vacuna', '💉')">💉</button>
-                <button class="pet-card-btn" style="padding:10px" onclick="openEventForm('Vet', '🏥')">🏥</button>
+                <button class="pet-card-btn" style="padding:10px" onclick="openEventForm('Peso', '⚖️')">Peso ⚖️</button>
+                <button class="pet-card-btn" style="padding:10px" onclick="openEventForm('Medicina', '💊')">Medicinas 💊</button>
+                <button class="pet-card-btn" style="padding:10px" onclick="openEventForm('Vacuna', '💉')">Vacunas 💉</button>
+                <button class="pet-card-btn" style="padding:10px" onclick="openEventForm('Vet', '🏥')">Recomendaciones 🏥</button>
             </div>
             <div class="section-header">Historial Médico</div>
             <div id="detailLogs"></div>
@@ -139,20 +144,26 @@
     </div>
 
     <div id="view-add" class="view">
-        <header class="header"><h1 class="page-title">Perfil</h1></header>
+        <header class="header">
+        <button class="back-btn" onclick="safeGoHome()">← Inicio</button>   
+        <h1 class="page-title">Perfil</h1></header>
         <div class="main-container">
             <input type="text" id="petName" placeholder="Nombre" oninput="markDirty()">
             <input type="date" id="petBirth" oninput="markDirty()">
             <input type="text" id="petBreed" placeholder="Raza" oninput="markDirty()">
             <input type="text" id="petColor" placeholder="Color" oninput="markDirty()">
-            <select id="petType" oninput="markDirty()"><option value="Perro">Perro 🐶</option><option value="Gato">Gato 🐱</option></select>
-            <textarea id="petNotes" placeholder="Comida, gustos, notas..." style="height:100px" oninput="markDirty()"></textarea>
+            <select id="petType" oninput="markDirty()"><option value="">Elige uno</option><option value="Perro">Perro 🐶</option><option value="Gato">Gato 🐱</option><option value="Otro">Otro 🐰🐟🐦</option></select>
+            <textarea id="petNotes" placeholder="Breve Biografía:" style="height:100px" oninput="markDirty()"></textarea>
             <button class="btn-action" onclick="savePet()">Guardar Perfil</button>
         </div>
     </div>
 
     <div id="view-event" class="view">
-        <header class="header"><h1 class="page-title" id="eventHeader">Registro</h1></header>
+        <header class="header">
+        <button class="back-btn" onclick="safeGoProfile()">← Perfil</button> 
+
+
+        <h1 class="page-title" id="eventHeader">Registro</h1></header>
         <div class="main-container">
             <input type="hidden" id="editingLogId">
             <input type="date" id="eventDate" oninput="markDirty()">
@@ -184,6 +195,18 @@
             }
             isDirty = false;
             showView('home');
+        }
+
+        function safeGoProfile() {
+            if (isDirty) {
+                const proceed = confirm("Tienes información sin guardar. ¿Seguro que quieres volver al perfil y descartar los cambios?");
+                if (!proceed) {
+                    if(document.getElementById('sideMenu').classList.contains('active')) toggleMenu();
+                    return;
+                }
+            }
+            isDirty = false;
+            showView('detail');
         }
 
         function showView(viewId) {
