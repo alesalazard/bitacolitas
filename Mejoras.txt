@@ -1,0 +1,6 @@
+**Texto al input de fecha de nacimiento
+**La fecha de nacimiento (y los datos de perfil) deber'ian poder editarse.
+** El icono de recomendaciones de vet. se desbordó en vista movil.
+** El texto del bicho anterior debería borrarse cuando ingreso uno nuevo.
+** Independizar las vistas de cada seccion de registros.
+** Externalizar la base de datos
