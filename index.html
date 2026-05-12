@@ -16,6 +16,13 @@
     <link rel="apple-touch-icon" href="iconpet2.png" />
     <link rel="manifest" href="manifest.json" />
 
+    <!-- DATABASE FIREBASE -->
+    <script src="https://www.gstatic.com/firebasejs/9.1.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.1.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.1.1/firebase-firestore-compat.js"></script>
+
+    <script src="config.js"></script>
+
     <style>
       :root {
         --bg-body: #10161f;
@@ -256,9 +263,7 @@
       >
         ⚠️ Borrar Todo
       </button>
-      <button 
-        class="menu-item" 
-        onclick="auth.signOut()">
+      <button class="menu-item" onclick="auth.signOut()">
         🚪 Cerrar Sesión
       </button>
 
@@ -302,7 +307,7 @@
         </div>
         <div class="dev-info" style="text-align: center; margin-top: 2rem">
           <strong>App realizada por AleCode®</strong> 2026
-            <a href="mailto:alxsalazar21@gmail.com">alxsalazar21@gmail.com</a> 
+          <a href="mailto:alxsalazar21@gmail.com">alxsalazar21@gmail.com</a>
         </div>
       </div>
     </div>
@@ -535,7 +540,7 @@
         showView("home");
       }
 
-      let db = JSON.parse(localStorage.getItem("pet_db_v6")) || {
+      let db_local = JSON.parse(localStorage.getItem("pet_db_v6")) || {
         pets: [],
         logs: [],
       };
@@ -674,7 +679,7 @@
       function renderHome() {
         const grid = document.getElementById("petGrid");
         grid.innerHTML =
-          db.pets
+          db_local.pets
             .map(
               (p) => `
                 <div class="pet-card-btn" onclick="openPet(${p.id})">
@@ -692,7 +697,7 @@
       }
 
       function renderDetail() {
-        const pet = db.pets.find((p) => p.id === currentPetId);
+        const pet = db_local.pets.find((p) => p.id === currentPetId);
         document.getElementById("detailPetName").innerText = pet.name;
         document.getElementById("petBio").innerHTML = `
                 <div style="font-size:0.9rem">
@@ -702,7 +707,7 @@
                     <div style="margin-top:8px; color:var(--text-secondary)">${pet.notes}</div>
                 </div>
             `;
-        const logs = db.logs.filter((l) => l.petId === currentPetId);
+        const logs = db_local.logs.filter((l) => l.petId === currentPetId);
         document.getElementById("detailLogs").innerHTML =
           logs
             .map(
@@ -723,21 +728,21 @@
 
       function deleteLog(id) {
         if (confirm("¿Borrar?")) {
-          db.logs = db.logs.filter((l) => l.id !== id);
+          db_local.logs = db_local.logs.filter((l) => l.id !== id);
           saveDB();
           renderDetail();
         }
       }
       function deletePet() {
         if (confirm("¿Borrar perfil?")) {
-          db.pets = db.pets.filter((p) => p.id !== currentPetId);
-          db.logs = db.logs.filter((l) => l.petId !== currentPetId);
+          db_local.pets = db_local.pets.filter((p) => p.id !== currentPetId);
+          db_local.logs = db_local.logs.filter((l) => l.petId !== currentPetId);
           saveDB();
           showView("home");
         }
       }
       function saveDB() {
-        localStorage.setItem("pet_db_v6", JSON.stringify(db));
+        localStorage.setItem("pet_db_v6", JSON.stringify(db_local));
       }
       function toggleTheme() {
         const body = document.body;
@@ -748,7 +753,7 @@
         toggleMenu();
       }
       function exportData() {
-        const blob = new Blob([JSON.stringify(db)], {
+        const blob = new Blob([JSON.stringify(db_local)], {
           type: "application/json",
         });
         const url = URL.createObjectURL(blob);
@@ -759,7 +764,7 @@
         toggleMenu();
       }
       function clearAll() {
-        if (confirm("¿Borrar TODO definitivamente?")) {
+        if (confirm("Esto vaciará los datos de la memoria local del teléfono pero continuará en la base de datos.")) {
           localStorage.clear();
           location.reload();
         }
