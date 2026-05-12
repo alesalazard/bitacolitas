@@ -166,7 +166,7 @@
         const birth = document.getElementById("petBirth").value;
         if (!name || !birth) return alert("Faltan datos obligatorios");
 
-        db.pets.push({
+        db_local.pets.push({
           id: Date.now(),
           name,
           birth,

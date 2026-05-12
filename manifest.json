@@ -1,7 +1,7 @@
 {
   "name": "Bitacolitas",
   "short_name": "Bitacolitas",
-  "description": "Bitácora local para mascotas",
+  "description": "Bitácora de salud para mascotas",
   "start_url": "index.html",
   "display": "standalone",
   "background_color": "#10161f",
