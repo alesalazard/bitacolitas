@@ -10,3 +10,13 @@ const firebaseConfig = {
 firebase.initializeApp(firebaseConfig);
 const auth = firebase.auth();
 const db = firebase.firestore();
+
+// AGREGAR ESTO PARA ACTIVAR EL MODO OFFLINE:
+db.enablePersistence()
+  .catch((err) => {
+    if (err.code == 'failed-precondition') {
+      console.warn("Múltiples pestañas abiertas, la persistencia solo funciona en una.");
+    } else if (err.code == 'unimplemented') {
+      console.warn("Tu navegador no soporta el almacenamiento offline de Firebase.");
+    }
+  });
