@@ -116,43 +116,7 @@
       <div class="main-container">
         <div class="section-header">Biografía</div>
         <div class="bio-box" id="petBio"></div>
-        <div class="section-header">Nuevo Registro</div>
-        <div
-          style="
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 10px;
-          "
-        >
-          <button
-            class="pet-card-btn"
-            style="padding: 10px"
-            onclick="openEventForm('Peso', '⚖️')"
-          >
-            Peso ⚖️
-          </button>
-          <button
-            class="pet-card-btn"
-            style="padding: 10px"
-            onclick="openEventForm('Medicina', '💊')"
-          >
-            Medicinas 💊
-          </button>
-          <button
-            class="pet-card-btn"
-            style="padding: 10px"
-            onclick="openEventForm('Vacuna', '💉')"
-          >
-            Vacunas 💉
-          </button>
-          <button
-            class="pet-card-btn"
-            style="padding: 10px"
-            onclick="openEventForm('Vet', '🏥')"
-          >
-            Recomendaciones 🏥
-          </button>
-        </div>
+        
         <div class="section-header">Historial Médico</div>
         <div id="detailLogs"></div>
         <button
@@ -208,26 +172,32 @@
       </div>
     </div>
 
-    <div id="view-event" class="view">
+    <div id="view-category" class="view">
       <header class="header">
-        <button class="back-btn" onclick="safeGoProfile()">← Perfil</button>
-
-        <h1 class="page-title" id="eventHeader">Registro</h1>
+        <button class="back-btn" onclick="showView('detail')">← Perfil</button>
+        <h1 class="page-title" id="categoryHeader">Categoría</h1>
       </header>
+      
       <div class="main-container">
-        <input type="hidden" id="editingLogId" />
-        <input type="date" id="eventDate" oninput="markDirty()" />
-        <textarea
-          id="eventNote"
-          placeholder="Detalles..."
-          style="height: 150px; margin-top: 15px"
-          oninput="markDirty()"
-        ></textarea>
-        <button class="btn-action" id="btnSaveLog" onclick="saveLog()">
-          Guardar
-        </button>
+        <div style="background: var(--bg-card, #fff); padding: 15px; border-radius: 12px; margin-bottom: 20px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); border: 1px solid #eee;">
+            <h3 id="inlineFormTitle" style="margin-top: 0; margin-bottom: 12px; font-size: 1rem; color: var(--accent);">Añadir Nuevo</h3>
+            <input type="hidden" id="editingLogId" />
+            
+            <input type="date" id="eventDate" style="width: 100%; margin-bottom: 10px; padding: 10px; border-radius: 8px; border: 1px solid #ccc; box-sizing: border-box;" />
+            
+            <textarea id="eventNote" placeholder="Escribe los detalles aquí..." style="height: 70px; width: 100%; margin-bottom: 10px; padding: 10px; border-radius: 8px; border: 1px solid #ccc; box-sizing: border-box; resize: none;"></textarea>
+            
+            <div style="display: flex; gap: 10px;">
+                <button class="btn-action" onclick="saveLog()" style="flex: 1; padding: 10px; margin: 0;">Guardar</button>
+                <button id="cancelEditBtn" onclick="resetInlineForm()" style="flex: 1; padding: 10px; margin: 0; background: #e0e0e0; color: #333; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; display: none;">Cancelar</button>
+            </div>
+        </div>
+
+        <h3 style="font-size: 0.9rem; color: gray; margin-bottom: 10px;">Historial</h3>
+        <div id="categoryLogsList"></div>
       </div>
     </div>
+
     <script src="src/js/config.js"></script>
     <script src="src/js/main.js"></script>
   </body>

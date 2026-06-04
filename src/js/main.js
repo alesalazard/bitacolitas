@@ -7,6 +7,8 @@ let db_local = { pets: [], logs: [] };
 let currentPetId = null;
 let currentEventType = "";
 let isDirty = false; 
+let currentCategoryName = "";
+let currentCategoryIcon = "";
 
 // Variables para apagar los listeners si el usuario cierra sesión
 let unsubPets = null;
@@ -95,6 +97,8 @@ function syncData() {
       // Si el usuario está viendo el detalle, lo refrescamos
       if (document.getElementById("view-detail").classList.contains("active")) {
           renderDetail();
+      } else if (document.getElementById("view-category").classList.contains("active")) {
+          renderCategoryLogs();
       }
     });
 }
@@ -293,19 +297,157 @@ function renderDetail() {
             </div>
         </div>
     `;
+
+  const categories = [
+     { name: "Peso", icon: "⚖️" },
+     { name: "Medicinas", icon: "💊" },
+     { name: "Vacunas", icon: "💉" },
+     { name: "Chequeos", icon: "🩺" },
+     { name: "Recomendaciones", icon: "📋" }
+  ];
+
+  document.getElementById("detailLogs").innerHTML = `
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 15px;">
+        ${categories.map(c => `
+            <button onclick="openCategory('${c.name}', '${c.icon}')" style="padding: 15px; border-radius: 12px; border: 1px solid #ddd; background: var(--bg-card, #fff); font-size: 0.9rem; font-weight: bold; cursor:pointer; display:flex; flex-direction:column; align-items:center; gap:8px; box-shadow: 0 2px 5px rgba(0,0,0,0.05);">
+                <span style="font-size: 2rem;">${c.icon}</span>
+                ${c.name}
+            </button>
+        `).join('')}
+    </div>
+  `;
+}
+
+  // Abre la categoría y limpia el formulario integrado
+function openCategory(name, icon) {
+    currentCategoryName = name;
+    currentCategoryIcon = icon;
+    document.getElementById("categoryHeader").innerText = icon + " " + name;
+    resetInlineForm(); // Limpiamos el formulario al entrar
+    renderCategoryLogs();
+    showView("category");
+}
+
+function resetInlineForm() {
+    document.getElementById("editingLogId").value = "";
+    document.getElementById("eventDate").valueAsDate = new Date();
+    document.getElementById("eventNote").value = "";
+    document.getElementById("inlineFormTitle").innerText = "Añadir Nuevo";
+    document.getElementById("cancelEditBtn").style.display = "none";
+}
+
+// Prepara el formulario integrado para editar un registro existente
+function editLog(logId) {
+    const log = db_local.logs.find((l) => l.id === logId);
+    if (!log) return;
     
-  const logs = db_local.logs.filter((l) => l.petId === currentPetId);
-  document.getElementById("detailLogs").innerHTML = logs.map((l) => `
-        <div class="record-card">
-            <div style="display:flex; justify-content:space-between"><strong>${l.type}</strong><span>${l.frozenAge} años</span></div>
-            <p style="font-size:0.85rem; margin:8px 0">${l.note}</p>
-            <small style="color:var(--text-secondary)">${l.date}</small>
-            <div style="margin-top:10px">
-                <button onclick="openEventForm('${l.type}', '✏️', '${l.id}')" style="background:none; border:none; color:var(--accent); font-size:0.7rem">EDITAR</button>
-                <button onclick="deleteLog('${l.id}')" style="background:none; border:none; color:var(--danger); font-size:0.7rem; margin-left:10px">BORRAR</button>
+    document.getElementById("editingLogId").value = logId;
+    document.getElementById("eventDate").value = log.date;
+    document.getElementById("eventNote").value = log.note;
+    
+    document.getElementById("inlineFormTitle").innerText = "✏️ Editando Registro";
+    document.getElementById("cancelEditBtn").style.display = "block";
+    
+    // Subimos la pantalla automáticamente para que el usuario vea el formulario
+    document.getElementById("view-category").scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+// NUEVA: Filtra la base de datos para mostrar solo los registros de esta categoría
+function renderCategoryLogs() {
+    const logs = db_local.logs.filter((l) => l.petId === currentPetId && l.type === currentCategoryName);
+    const listContainer = document.getElementById("categoryLogsList");
+
+    // Ordenamos para que los más recientes salgan arriba
+    logs.sort((a, b) => new Date(b.date) - new Date(a.date));
+
+    listContainer.innerHTML = logs.map((l) => `
+        <div class="record-card" style="margin-bottom: 10px;">
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+                <strong>${l.date}</strong>
+                <span style="font-size: 0.8rem; background: var(--bg-secondary); padding: 2px 6px; border-radius: 4px;">${l.frozenAge} años</span>
+            </div>
+            <p style="font-size:0.9rem; margin:10px 0; white-space: pre-wrap;">${l.note}</p>
+            <div style="display:flex; gap: 15px; margin-top:10px; border-top: 1px solid #eee; padding-top: 8px;">
+                <button onclick="openEventForm('${l.id}')" style="background:none; border:none; color:var(--accent); font-size:0.75rem; font-weight:bold; cursor:pointer;">EDITAR</button>
+                <button onclick="deleteLog('${l.id}')" style="background:none; border:none; color:var(--danger); font-size:0.75rem; font-weight:bold; cursor:pointer;">BORRAR</button>
             </div>
         </div>
-    `).join("") || "<p>Sin registros médicos.</p>";
+    `).join("") || `<p style="text-align:center; color:gray; margin-top: 30px;">Aún no hay registros en esta sección.</p>`;
+}
+
+// REEMPLAZAR: Simplificamos openEventForm porque la categoría ya está seleccionada
+function openEventForm(logId = null) {
+  currentEventType = currentCategoryName; // Usamos la categoría en la que estamos
+  isDirty = false;
+  
+  if (logId) {
+    const log = db_local.logs.find((l) => l.id === logId);
+    document.getElementById("editingLogId").value = logId;
+    document.getElementById("eventDate").value = log.date;
+    document.getElementById("eventNote").value = log.note;
+    document.getElementById("eventHeader").innerText = currentCategoryIcon + " Editar";
+  } else {
+    document.getElementById("editingLogId").value = "";
+    document.getElementById("eventDate").valueAsDate = new Date();
+    document.getElementById("eventNote").value = "";
+    document.getElementById("eventHeader").innerText = currentCategoryIcon + " Nuevo";
+  }
+  showView("event");
+}
+
+// REEMPLAZAR: Al guardar el registro, regresamos a la pantalla de la categoría
+async function saveLog() {
+  const note = document.getElementById("eventNote").value;
+  const date = document.getElementById("eventDate").value;
+  const logId = document.getElementById("editingLogId").value;
+  
+  if (!note || !date) return alert("Faltan datos por llenar");
+
+  const pet = db_local.pets.find((p) => p.id === currentPetId);
+  const age = calculateAge(pet.birth, date);
+
+  const logData = {
+    petId: currentPetId,
+    type: currentEventType,
+    note,
+    date,
+    frozenAge: age,
+    updatedAt: new Date()
+  };
+
+  try {
+      if (logId) {
+        await db.collection("users").doc(currentUserId).collection("logs").doc(logId).update(logData);
+      } else {
+        logData.createdAt = new Date();
+        await db.collection("users").doc(currentUserId).collection("logs").add(logData);
+      }
+      resetInlineForm(); // Limpiamos el formulario para la próxima vez
+  } catch(e) {
+      alert("Error al guardar el registro.");
+  }
+}
+
+// Renderiza la lista (actualizada para llamar a editLog en vez de openEventForm)
+function renderCategoryLogs() {
+    const logs = db_local.logs.filter((l) => l.petId === currentPetId && l.type === currentCategoryName);
+    const listContainer = document.getElementById("categoryLogsList");
+
+    logs.sort((a, b) => new Date(b.date) - new Date(a.date));
+
+    listContainer.innerHTML = logs.map((l) => `
+        <div class="record-card" style="margin-bottom: 10px;">
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+                <strong>${l.date}</strong>
+                <span style="font-size: 0.8rem; background: var(--bg-secondary); padding: 2px 6px; border-radius: 4px;">${l.frozenAge} años</span>
+            </div>
+            <p style="font-size:0.9rem; margin:10px 0; white-space: pre-wrap;">${l.note}</p>
+            <div style="display:flex; gap: 15px; margin-top:10px; border-top: 1px solid #eee; padding-top: 8px;">
+                <button onclick="editLog('${l.id}')" style="background:none; border:none; color:var(--accent); font-size:0.75rem; font-weight:bold; cursor:pointer;">EDITAR</button>
+                <button onclick="deleteLog('${l.id}')" style="background:none; border:none; color:var(--danger); font-size:0.75rem; font-weight:bold; cursor:pointer;">BORRAR</button>
+            </div>
+        </div>
+    `).join("") || `<p style="text-align:center; color:gray; margin-top: 30px;">Aún no hay registros en esta sección.</p>`;
 }
 
 // ==========================================
@@ -371,23 +513,23 @@ function calculateAge(birthDate, refDate = new Date()) {
   return age < 0 ? 0 : age;
 }
 
-function openEventForm(type, icon, logId = null) {
-  currentEventType = type;
-  document.getElementById("eventHeader").innerText = icon + " " + type;
-  isDirty = false;
+// function openEventForm(type, icon, logId = null) {
+//   currentEventType = type;
+//   document.getElementById("eventHeader").innerText = icon + " " + type;
+//   isDirty = false;
   
-  if (logId) {
-    const log = db_local.logs.find((l) => l.id === logId);
-    document.getElementById("editingLogId").value = logId;
-    document.getElementById("eventDate").value = log.date;
-    document.getElementById("eventNote").value = log.note;
-  } else {
-    document.getElementById("editingLogId").value = "";
-    document.getElementById("eventDate").valueAsDate = new Date();
-    document.getElementById("eventNote").value = "";
-  }
-  showView("event");
-}
+//   if (logId) {
+//     const log = db_local.logs.find((l) => l.id === logId);
+//     document.getElementById("editingLogId").value = logId;
+//     document.getElementById("eventDate").value = log.date;
+//     document.getElementById("eventNote").value = log.note;
+//   } else {
+//     document.getElementById("editingLogId").value = "";
+//     document.getElementById("eventDate").valueAsDate = new Date();
+//     document.getElementById("eventNote").value = "";
+//   }
+//   showView("event");
+// }
 
 function toggleTheme() {
   const body = document.body;
