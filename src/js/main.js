@@ -209,39 +209,6 @@ async function deletePet() {
   }
 }
 
-async function saveLog() {
-  const note = document.getElementById("eventNote").value;
-  const date = document.getElementById("eventDate").value;
-  const logId = document.getElementById("editingLogId").value;
-  
-  const pet = db_local.pets.find((p) => p.id === currentPetId);
-  const age = calculateAge(pet.birth, date);
-
-  const logData = {
-    petId: currentPetId,
-    type: currentEventType,
-    note,
-    date,
-    frozenAge: age,
-    updatedAt: new Date()
-  };
-
-  try {
-      if (logId) {
-        // Actualizar registro existente
-        await db.collection("users").doc(currentUserId).collection("logs").doc(logId).update(logData);
-      } else {
-        // Crear registro nuevo
-        logData.createdAt = new Date();
-        await db.collection("users").doc(currentUserId).collection("logs").add(logData);
-      }
-      isDirty = false;
-      showView("detail");
-  } catch(e) {
-      alert("Error al guardar el registro.");
-  }
-}
-
 async function deleteLog(id) {
   if (confirm("¿Borrar este registro?")) {
     try {
@@ -287,7 +254,7 @@ function renderDetail() {
         <div style="font-size:0.9rem; position: relative;">
             <div><strong>Raza:</strong> ${pet.breed}</div>
             <div><strong>Color:</strong> ${pet.color}</div>
-            <div><strong>Edad actual:</strong> ${calculateAge(pet.birth)} años</div>
+            <div><strong>Edad actual:</strong> ${calculateAge(pet.birth)}</div>
             <div style="margin-top:8px; color:var(--text-secondary); white-space: pre-wrap;">${pet.notes}</div>
             
             <div style="margin-top: 14px;">
@@ -395,39 +362,6 @@ function openEventForm(logId = null) {
   showView("event");
 }
 
-// REEMPLAZAR: Al guardar el registro, regresamos a la pantalla de la categoría
-async function saveLog() {
-  const note = document.getElementById("eventNote").value;
-  const date = document.getElementById("eventDate").value;
-  const logId = document.getElementById("editingLogId").value;
-  
-  if (!note || !date) return alert("Faltan datos por llenar");
-
-  const pet = db_local.pets.find((p) => p.id === currentPetId);
-  const age = calculateAge(pet.birth, date);
-
-  const logData = {
-    petId: currentPetId,
-    type: currentEventType,
-    note,
-    date,
-    frozenAge: age,
-    updatedAt: new Date()
-  };
-
-  try {
-      if (logId) {
-        await db.collection("users").doc(currentUserId).collection("logs").doc(logId).update(logData);
-      } else {
-        logData.createdAt = new Date();
-        await db.collection("users").doc(currentUserId).collection("logs").add(logData);
-      }
-      resetInlineForm(); // Limpiamos el formulario para la próxima vez
-  } catch(e) {
-      alert("Error al guardar el registro.");
-  }
-}
-
 // Renderiza la lista (actualizada para llamar a editLog en vez de openEventForm)
 function renderCategoryLogs() {
     const logs = db_local.logs.filter((l) => l.petId === currentPetId && l.type === currentCategoryName);
@@ -439,7 +373,7 @@ function renderCategoryLogs() {
         <div class="record-card" style="margin-bottom: 10px;">
             <div style="display:flex; justify-content:space-between; align-items:center;">
                 <strong>${l.date}</strong>
-                <span style="font-size: 0.8rem; background: var(--bg-secondary); padding: 2px 6px; border-radius: 4px;">${l.frozenAge} años</span>
+                <span style="font-size: 0.8rem; background: var(--bg-secondary); padding: 2px 6px; border-radius: 4px;">${l.frozenAge}</span>
             </div>
             <p style="font-size:0.9rem; margin:10px 0; white-space: pre-wrap;">${l.note}</p>
             <div style="display:flex; gap: 15px; margin-top:10px; border-top: 1px solid #eee; padding-top: 8px;">
@@ -449,6 +383,51 @@ function renderCategoryLogs() {
         </div>
     `).join("") || `<p style="text-align:center; color:gray; margin-top: 30px;">Aún no hay registros en esta sección.</p>`;
 }
+
+async function saveLog() {
+  console.log("🚀 [Bitacolitas] Intentando ejecutar saveLog()...");
+  const note = document.getElementById("eventNote").value;
+  const date = document.getElementById("eventDate").value;
+  const logId = document.getElementById("editingLogId").value;
+
+  console.log("📝 Datos del formulario:", { note, date, logId });
+  console.log("🐾 Contexto actual:", { currentUserId, currentPetId, currentCategoryName });
+
+  // Validaciones de seguridad para no enviar datos vacíos a Firebase
+  if (!currentUserId) return alert("Error: No estás logueado.");
+  if (!currentPetId) return alert("Error: No se ha seleccionado ninguna mascota.");
+  if (!currentCategoryName) return alert("Error: No hay una categoría activa.");
+  if (!note || !date) return alert("Por favor, rellena la fecha y los detalles.");
+  
+  if (!note || !date) return alert("Faltan datos por llenar");
+
+  const pet = db_local.pets.find((p) => p.id === currentPetId);
+  const age = calculateAge(pet.birth, date);
+
+  const logData = {
+    petId: currentPetId,
+    type: currentCategoryName,
+    note,
+    date,
+    frozenAge: age,
+    updatedAt: new Date()
+  };
+
+  try {
+      if (logId) {
+        console.log("🔄 Actualizando registro antiguo en Firestore...");
+        await db.collection("users").doc(currentUserId).collection("logs").doc(logId).update(logData);
+      } else {
+        logData.createdAt = new Date();
+        await db.collection("users").doc(currentUserId).collection("logs").add(logData);
+      }
+      resetInlineForm(); // Limpiamos el formulario para la próxima vez
+  } catch(e) {
+      console.error("❌ Error de Firestore al guardar:", e);
+      alert("Error al guardar el registro.");
+  }
+}
+
 
 // ==========================================
 // 6. FUNCIONES DE NAVEGACIÓN Y UTILIDAD
@@ -505,31 +484,46 @@ function safeGoProfile() {
   showView("detail");
 }
 
-function calculateAge(birthDate, refDate = new Date()) {
-  const birth = new Date(birthDate);
-  const ref = new Date(refDate);
-  let age = ref.getFullYear() - birth.getFullYear();
-  if (ref.getMonth() < birth.getMonth() || (ref.getMonth() === birth.getMonth() && ref.getDate() < birth.getDate())) age--;
-  return age < 0 ? 0 : age;
-}
+// NUEVA: Calcula la edad en años y meses de forma exacta
+function calculateAge(birthDateString, targetDateString = null) {
+    if (!birthDateString) return "Desconocida";
 
-// function openEventForm(type, icon, logId = null) {
-//   currentEventType = type;
-//   document.getElementById("eventHeader").innerText = icon + " " + type;
-//   isDirty = false;
-  
-//   if (logId) {
-//     const log = db_local.logs.find((l) => l.id === logId);
-//     document.getElementById("editingLogId").value = logId;
-//     document.getElementById("eventDate").value = log.date;
-//     document.getElementById("eventNote").value = log.note;
-//   } else {
-//     document.getElementById("editingLogId").value = "";
-//     document.getElementById("eventDate").valueAsDate = new Date();
-//     document.getElementById("eventNote").value = "";
-//   }
-//   showView("event");
-// }
+    // Añadimos 'T00:00:00' para evitar que las zonas horarias nos roben un día
+    const birth = new Date(birthDateString + 'T00:00:00');
+    const target = targetDateString ? new Date(targetDateString + 'T00:00:00') : new Date();
+
+    let years = target.getFullYear() - birth.getFullYear();
+    let months = target.getMonth() - birth.getMonth();
+
+    // Si aún no ha pasado el día de su cumpleaños este mes, restamos un mes
+    if (target.getDate() < birth.getDate()) {
+        months--;
+    }
+
+    // Si los meses son negativos, significa que aún no ha cumplido años este año
+    if (months < 0) {
+        years--;
+        months += 12;
+    }
+
+    if (years < 0) return "Aún no nacido"; // Prevención de errores con fechas futuras
+
+    // Construimos un texto amigable y gramaticalmente correcto
+    let ageString = "";
+    
+    if (years > 0) {
+        ageString += years === 1 ? "1 año" : `${years} años`;
+    }
+    
+    if (months > 0) {
+        if (years > 0) ageString += " y ";
+        ageString += months === 1 ? "1 mes" : `${months} meses`;
+    }
+
+    if (ageString === "") return "Recién nacido";
+
+    return ageString;
+}
 
 function toggleTheme() {
   const body = document.body;
