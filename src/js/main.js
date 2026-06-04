@@ -102,27 +102,69 @@ function syncData() {
 // ==========================================
 // 4. GUARDAR Y ELIMINAR DATOS (MASCOTAS Y LOGS)
 // ==========================================
+function openPetForm(petId = null) {
+  isDirty = false;
+  
+  // Revisa cuál es el ID real de tu vista de formulario en el HTML (puede ser 'pet' o 'pet-form')
+  const nombreVistaFormulario = "add"; 
+
+  if (petId) {
+    // --- MODO EDICIÓN ---
+    const pet = db_local.pets.find((p) => p.id === petId);
+    if (!pet) return;
+
+    document.getElementById("editingPetId").value = petId;
+    document.getElementById("petName").value = pet.name;
+    document.getElementById("petBirth").value = pet.birth;
+    document.getElementById("petBreed").value = pet.breed === "-" ? "" : pet.breed;
+    document.getElementById("petColor").value = pet.color === "-" ? "" : pet.color;
+    document.getElementById("petType").value = pet.type || "";
+    document.getElementById("petNotes").value = pet.notes === "Sin notas" ? "" : pet.notes;
+  } else {
+    // --- MODO CREACIÓN (Vaciar todo) ---
+    document.getElementById("editingPetId").value = "";
+    document.getElementById("petName").value = "";
+    document.getElementById("petBirth").value = "";
+    document.getElementById("petBreed").value = "";
+    document.getElementById("petColor").value = "";
+    document.getElementById("petType").value = "";
+    document.getElementById("petNotes").value = "";
+  }
+  
+  showView(nombreVistaFormulario);
+}
+
 async function savePet() {
   const name = document.getElementById("petName").value;
   const birth = document.getElementById("petBirth").value;
+  const petId = document.getElementById("editingPetId").value; // Detectamos si es edición
 
   if (!name || !birth) return alert("Faltan datos obligatorios (Nombre y Fecha de Nacimiento)");
 
-  const newPet = {
+  const petData = {
     name,
     birth,
     breed: document.getElementById("petBreed").value || "-",
     color: document.getElementById("petColor").value || "-",
-    type: document.getElementById("petType").value, // Aquí viene "Perro", "Gato" u "Otro"
+    type: document.getElementById("petType").value,
     notes: document.getElementById("petNotes").value || "Sin notas",
-    createdAt: new Date()
+    updatedAt: new Date()
   };
 
   try {
-    // Guarda directo en Firebase
-    await db.collection("users").doc(currentUserId).collection("pets").add(newPet);
+    if (petId) {
+      // ACTUALIZAR EN FIREBASE
+      await db.collection("users").doc(currentUserId).collection("pets").doc(petId).update(petData);
+      alert("¡Perfil y biografía actualizados con éxito!");
+    } else {
+      // CREAR NUEVO EN FIREBASE
+      petData.createdAt = new Date();
+      await db.collection("users").doc(currentUserId).collection("pets").add(petData);
+      alert("¡Mascota guardada con éxito!");
+    }
     
-    // Limpiamos el formulario
+    // Limpiamos por completo el formulario
+    document.getElementById("editingPetId").value = "";
     document.getElementById("petName").value = "";
     document.getElementById("petBirth").value = "";
     document.getElementById("petBreed").value = "";
@@ -131,10 +173,16 @@ async function savePet() {
     document.getElementById("petNotes").value = "";
 
     isDirty = false;
-    showView("home"); // Firebase disparará renderHome automáticamente
+    
+    // Si editábamos, volvemos a su pantalla de detalle; si era nueva, al Home
+    if (petId) {
+      showView("detail");
+    } else {
+      showView("home");
+    }
   } catch (error) {
     console.error("Error guardando mascota:", error);
-    alert("Error al guardar la mascota en la nube.");
+    alert("Hubo un error al guardar los datos en la nube.");
   }
 }
 
@@ -226,15 +274,23 @@ function renderHome() {
 
 function renderDetail() {
   const pet = db_local.pets.find((p) => p.id === currentPetId);
-  if(!pet) return; // Si la mascota recién se borró, evitamos errores
+  if(!pet) return;
 
   document.getElementById("detailPetName").innerText = pet.name;
+  
+  // Agregamos el botón de editar al final del HTML de la biografía
   document.getElementById("petBio").innerHTML = `
-        <div style="font-size:0.9rem">
+        <div style="font-size:0.9rem; position: relative;">
             <div><strong>Raza:</strong> ${pet.breed}</div>
             <div><strong>Color:</strong> ${pet.color}</div>
             <div><strong>Edad actual:</strong> ${calculateAge(pet.birth)} años</div>
-            <div style="margin-top:8px; color:var(--text-secondary)">${pet.notes}</div>
+            <div style="margin-top:8px; color:var(--text-secondary); white-space: pre-wrap;">${pet.notes}</div>
+            
+            <div style="margin-top: 14px;">
+                <button onclick="openPetForm('${pet.id}')" class="btn-edit-bio" style="background:var(--accent); color:white; border:none; padding: 6px 12px; border-radius:6px; font-size:0.8rem; cursor:pointer; font-weight:bold;">
+                  ✏️ Editar Perfil
+                </button>
+            </div>
         </div>
     `;
     
